@@ -7,7 +7,11 @@ st.title("🏏 IPL Analytics Dashboard")
 st.markdown("Interactive dashboard for analyzing IPL match data")
 
 matches = pd.read_csv("matches.csv")
-deliveries = pd.read_csv("deliveries.csv")
+try:
+    deliveries = pd.read_csv("deliveries.csv")
+    deliveries_available = True
+except:
+    deliveries_available = False
 
 st.subheader("Dataset Preview")
 st.write(matches.head())
@@ -40,10 +44,21 @@ percentage = (len(toss_win_match_win) / len(matches)) * 100
 
 st.write(f"Toss winner also won match: {percentage:.2f}%")
 
+st.markdown("---")
 st.subheader("Top 10 Players by Runs")
 
-top_batsmen = deliveries.groupby('batter')['batsman_runs'].sum().sort_values(ascending=False).head(10)
+try:
+    deliveries = pd.read_csv("deliveries.csv")
 
-st.bar_chart(top_batsmen)
+    if 'batter' in deliveries.columns:
+        player_col = 'batter'
+    else:
+        player_col = 'batsman'
 
-st.write(deliveries.columns)
+    top_batsmen = deliveries.groupby(player_col)['batsman_runs'].sum() \
+        .sort_values(ascending=False).head(10)
+
+    st.bar_chart(top_batsmen)
+
+except:
+    st.warning("⚠️ Deliveries dataset not available in deployed version")
